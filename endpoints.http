@@ -1,0 +1,87 @@
+# Flow
+#  1. Create an account using the signup route
+#  2. Login with credentials, will return a token. Change the value 
+#     of the token variable to the new token. This token lasts an hour
+#  3. Open web browser to http://localhost:8080/auth/connectSpotify to get
+#     a spotify token. Takes you through the OAuth 2.0 flow if haven't yet
+#  4. /profile route fetches the profile
+#  5. /profile/build adds data into the profile
+
+@contentType = application/json 
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRyZWVjZXBvdWxzZW5AZ21haWwuY29tIiwidXNlcklkIjoiNjM1YzU2Yzc2NzdjZTJlOTQ3YmNkNzdjIiwiaWF0IjoxNjY2OTk1OTExfQ.mkKOVIQ7az9-NwSUAWh9pUrm1ZZPGzz3i7rSUpzUmno
+
+@spotifyToken = BQD4rl5agPJ4ZGjTvERmvez9ocAz0SQMH55lR11kQmsClHPlJnjJ9HC65Ho8eDoLGbyv_9Nk-F7vbLvsNziYrh2NWBTqqgnMyd5n3HLicH2T6oNBpnnq0rH5OLMDuskDFatYIrytoNjDnUcnoym3rWHfEYm9zdZ9vRlh8iG90PKFbvSirnAeSfW-fCKh-aQviyKUuJgfpEqDcYZhqaMSkS-6hMgp32kpaRHvR0IMo-qBPbA
+
+###
+# Base URL
+get http://localhost:8080/
+
+###
+# Signup
+post http://localhost:8080/auth/signup
+Content-Type: {{contentType}}
+
+{
+  "name": "Katelyn Poulsen",
+  "email": "katelynparkeshs@gmail.com",
+  "password": "jukeboxPass"
+}
+
+###
+# Login
+post http://localhost:8080/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "dreecepoulsen@gmail.com",
+  "password": "jukeboxPass"
+}
+
+###
+# Logout
+put http://localhost:8080/auth/logout
+Authorization: Bearer {{token}}
+
+###
+get http://localhost:8080/auth/connectSpotify
+Authorization: Bearer {{token}}
+
+###
+get http://localhost:8080/auth/authorizeSpotify
+Authorization: Bearer {{token}}
+
+###
+get http://localhost:8080/profile/
+Authorization: Bearer {{token}}
+
+###
+get http://localhost:8080/profile/build
+Authorization: Bearer {{token}}
+
+###   
+get https://api.spotify.com/v1/me
+Authorization: "Bearer {{spotifyToken}}"
+Content-Type: {{contentType}}
+
+###
+get https://api.spotify.com/v1/tracks/1TGWNtFzNZsNeqT6oBvXtw
+Authorization: "Bearer {{spotifyToken}}"
+
+###   
+get https://api.spotify.com/v1/me/tracks
+Authorization: "Bearer {{spotifyToken}}"
+Content-Type: {{contentType}}
+
+###
+get https://api.spotify.com/v1/me/top/tracks?limit=20&offset=40
+Authorization: "Bearer {{spotifyToken}}"
+Content-Type: {{contentType}}
+
+###
+GET https://api.spotify.com/v1/users/reece.poulsen/playlists
+Authorization: "Bearer {{spotifyToken}}"
+Content-Type: {{contentType}}
+
+###
+get http://localhost:8080/profile/users
+Authorization: Bearer {{token}}

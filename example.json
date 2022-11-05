@@ -1,0 +1,96 @@
+{
+  "album": {
+    "album_type": "album",
+    "genres": ["pop", "country"],
+    "artists": [
+      {
+        "external_urls": {
+          "spotify": "https://open.spotify.com/artist/4kI8Ie27vjvonwaB2ePh8T"
+        },
+        "href": "https://api.spotify.com/v1/artists/4kI8Ie27vjvonwaB2ePh8T",
+        "id": "4kI8Ie27vjvonwaB2ePh8T",
+        "name": "Portugal. The Man",
+        "type": "artist",
+        "uri": "spotify:artist:4kI8Ie27vjvonwaB2ePh8T"
+      }
+    ],
+    "available_markets": [
+      "US"
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/album/4VzzEviJGYUtAeSsJlI9QB"
+    },
+    "href": "https://api.spotify.com/v1/albums/4VzzEviJGYUtAeSsJlI9QB",
+    "id": "4VzzEviJGYUtAeSsJlI9QB",
+    "images": [
+      {
+        "height": 640,
+        "url": "https://i.scdn.co/image/ab67616d0000b273af52c228c9619ff6298b08cd",
+        "width": 640
+      },
+      {
+        "height": 300,
+        "url": "https://i.scdn.co/image/ab67616d00001e02af52c228c9619ff6298b08cd",
+        "width": 300
+      },
+      {
+        "height": 64,
+        "url": "https://i.scdn.co/image/ab67616d00004851af52c228c9619ff6298b08cd",
+        "width": 64
+      }
+    ],
+    "name": "Woodstock",
+    "release_date": "2017-06-16",
+    "release_date_precision": "day",
+    "total_tracks": 10,
+    "type": "album",
+    "uri": "spotify:album:4VzzEviJGYUtAeSsJlI9QB"
+  },
+  "artists": [
+    {
+      "external_urls": {
+        "spotify": "https://open.spotify.com/artist/4kI8Ie27vjvonwaB2ePh8T"
+      },
+      "href": "https://api.spotify.com/v1/artists/4kI8Ie27vjvonwaB2ePh8T",
+      "id": "4kI8Ie27vjvonwaB2ePh8T",
+      "name": "Portugal. The Man",
+      "type": "artist",
+      "uri": "spotify:artist:4kI8Ie27vjvonwaB2ePh8T"
+    }
+  ],
+  "available_markets": [
+      "US"
+    ],
+  "disc_number": 1,
+  "duration_ms": 246786,
+  "explicit": false,
+  "external_ids": {
+    "isrc": "USAT21700816"
+  },
+  "external_urls": {
+    "spotify": "https://open.spotify.com/track/60eOMEt3WNVX1m1jmApmnX"
+  },
+  "href": "https://api.spotify.com/v1/tracks/60eOMEt3WNVX1m1jmApmnX",
+  "id": "60eOMEt3WNVX1m1jmApmnX",
+  "is_local": false,
+  "name": "Live in the Moment",
+  "popularity": 62,
+  "preview_url": "https://p.scdn.co/mp3-preview/e1933e5648dceffee8af738ab5bdd22ac48ef454?cid=774b29d4f13844c495f206cafdad9c86",
+  "track_number": 3,
+  "type": "total_track_info",
+  "uri": "spotify:track:60eOMEt3WNVX1m1jmApmnX",
+  "danceability": 0.546,
+  "energy": 0.583,
+  "key": 6,
+  "loudness": -7.317,
+  "mode": 0,
+  "speechiness": 0.0348,
+  "acousticness": 0.002,
+  "instrumentalness": 0.173,
+  "liveness": 0.115,
+  "valence": 0.235,
+  "tempo": 128.017,
+  "track_href": "https://api.spotify.com/v1/tracks/60eOMEt3WNVX1m1jmApmnX",
+  "analysis_url": "https://api.spotify.com/v1/audio-analysis/60eOMEt3WNVX1m1jmApmnX",
+  "time_signature": 4
+}
