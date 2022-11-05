@@ -1,3 +1,5 @@
+import fetch from "node-fetch";
+
 const gatherData = async (token, accumulator, url) => {
   console.log("Getting", url);
   await fetch(url, {
