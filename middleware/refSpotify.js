@@ -15,16 +15,15 @@ export default async function refSpotify(req, res, next) {
         throw err;
       }
 
-      if (user.spotifyAccessToken == 'No Token') {
+      if (user.spotifyAccessToken === "No Token") {
         next();
       }
 
       const lastRefresh = user.lastRefresh;
       const now = new Date();
-      // * 1000 because get time returns milliseconds and spotify token timer is in seconds
       if (
         now.getTime() - lastRefresh.getTime() >=
-        user.spotifyTokenTimer * 1000
+        user.spotifyTokenTimer * 1000 // * 1000 because get time returns milliseconds and spotify token timer is in seconds
       ) {
         console.log("Refreshing token");
         const body = {
@@ -47,7 +46,8 @@ export default async function refSpotify(req, res, next) {
           body: encodeFormData(body),
         })
           .then((response) => response.json())
-          .then((data) => {
+          .then(async (data) => {
+            console.log("data received from refreshing spotify token", data);
             if (!data.access_token) {
               const err = new Error(
                 "Error refreshing token, no new token provided"
@@ -56,7 +56,8 @@ export default async function refSpotify(req, res, next) {
             }
             user.spotifyAccessToken = data.access_token;
             user.lastRefresh = new Date();
-            user.save();
+            await user.save();
+            console.log("End of spotify refresh");
           });
       } else {
         console.log("Token is still valid");
