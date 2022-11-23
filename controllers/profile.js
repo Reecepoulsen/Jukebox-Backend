@@ -283,33 +283,27 @@ export function addSong(req, res, next) {
 }
 
 export function updateWidgetPrivacy(req, res, next) {
+  // console.log("Request to change privacy of widget");
   Profile.findOne({ userId: req.userId })
-    .then((profile) => {
+    .then(async (profile) => {
       if (!profile) {
         throw new Error(
           `Error while updating widget privacy setting, unable to find profile for userId ${req.userId}`
         );
       }
 
-      const newWidgetList = profile.widgetList.map((w) => {
-        if (w.title === req.body.widgetTitle) {
-          w.privacy = req.body.privacy;
-        }
-      });
-
-      Profile.findOneAndUpdate(
-        { userId: req.userId },
-        { $set: { widgetList: newWidgetList } },
-        { returnNewDocument: true }
-      )
-        .then((result) => {
-          res
-            .status(200)
-            .json({ message: "Updated document result", result: result });
-        })
-        .catch((err) => {
-          next(err);
+      const targetIndex = profile.widgetList.findIndex(
+        (w) => w.title === req.body.widgetTitle
+      );
+      const widgetToUpdate = profile.widgetList[targetIndex];
+      widgetToUpdate.privacy = req.body.privacy;
+      profile.widgetList[targetIndex] = widgetToUpdate;
+      profile.save().then((newProfile) => {
+        res.status(200).json({
+          message: `Request to change widget privacy to ${req.body.privacy}`,
+          data: newProfile,
         });
+      });
     })
     .catch((err) => {
       next(err);
