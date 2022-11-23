@@ -8,9 +8,9 @@
 #  5. /profile/build adds data into the profile
 
 @contentType = application/json 
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRyZWVjZXBvdWxzZW5AZ21haWwuY29tIiwidXNlcklkIjoiNjM1YzU2Yzc2NzdjZTJlOTQ3YmNkNzdjIiwiaWF0IjoxNjY2OTk1OTExfQ.mkKOVIQ7az9-NwSUAWh9pUrm1ZZPGzz3i7rSUpzUmno
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRyZWVjZXBvdWxzZW5AZ21haWwuY29tIiwidXNlcklkIjoiNjM3YmM5MTU3OWVhZjk0MGFlNTFiZjhiIiwiaWF0IjoxNjY5MDU2Nzg5fQ.4_B1R8-tQX7BV0hB7qmV5uO1DGNVhcMIGDiPMb574Ow
 
-@spotifyToken = BQD4rl5agPJ4ZGjTvERmvez9ocAz0SQMH55lR11kQmsClHPlJnjJ9HC65Ho8eDoLGbyv_9Nk-F7vbLvsNziYrh2NWBTqqgnMyd5n3HLicH2T6oNBpnnq0rH5OLMDuskDFatYIrytoNjDnUcnoym3rWHfEYm9zdZ9vRlh8iG90PKFbvSirnAeSfW-fCKh-aQviyKUuJgfpEqDcYZhqaMSkS-6hMgp32kpaRHvR0IMo-qBPbA
+@spotifyToken = BQBlknMKWqPCnft7fGmUsQg4zeBWmiXYqPKrtKfHSmV10A5XKc_pwm8UlrETwhedtb7rcym1R43Bdbr8kAkIPhsb3fJ8L6fmMcFtEz0X07FYj5sswnDyB_2XChhGQHDJO2p2zYUC9okFPUdDdC40UTSAnmsVynK3XYK8WeM0ZzDvlDbgEve_Jhqjv6zzk2SCIpaLXjRZfGXBH3DsymElJz-O3O84-6i1YpLORdD4KcZK-Tk
 
 ###
 # Base URL
@@ -85,3 +85,18 @@ Content-Type: {{contentType}}
 ###
 get http://localhost:8080/profile/users
 Authorization: Bearer {{token}}
+
+###
+get http://localhost:8080/profile/songs/3Ywh8QMpMoakxcyEZ4dlql
+Authorization: Bearer {{token}}
+
+###
+POST http://localhost:8080/profile/playlist/addSong
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "trackUris": [
+    "spotify:track:6WqrGbkeXPT7Lqz8DNywoQ"
+  ]
+}
