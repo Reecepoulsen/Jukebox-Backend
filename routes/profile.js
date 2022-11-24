@@ -8,6 +8,7 @@ import {
   getSongsInPlaylist,
   updateWidgetPrivacy,
   addSong,
+  getUsersJukeboxPlaylist,
 } from "../controllers/profile.js";
 
 const router = Router();
@@ -21,6 +22,8 @@ router.get("/songs/:playlistId", isAuth, refSpotify, getSongsInPlaylist);
 router.post("/widget", isAuth, updateWidgetPrivacy);
 
 router.post("/playlist/addSong", isAuth, refSpotify, addSong);
+
+router.get("/playlist", isAuth, getUsersJukeboxPlaylist);
 
 // router.get("/build", isAuth, refSpotify, buildProfile);
 
