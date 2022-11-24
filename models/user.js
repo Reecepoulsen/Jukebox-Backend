@@ -43,6 +43,11 @@ const userSchema = new Schema({
     type: Date,
     required: true,
     default: new Date()
+  },
+  jukeboxPlaylist: {
+    type: Object,
+    required: true,
+    default: new Map()
   }
 });
 
