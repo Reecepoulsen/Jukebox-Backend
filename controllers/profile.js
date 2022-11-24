@@ -50,6 +50,19 @@ const getUsersTopArtists = async (spotifyToken) => {
   return data.items;
 };
 
+async function syncJukeboxPlaylistWithDb(user, playlistId) {
+  user.jukeboxPlaylist = {};
+  const jukeboxPlaylistSongs = await gatherData(
+    user.spotifyAccessToken,
+    [],
+    `https://api.spotify.com/v1/playlists/${playlistId}/tracks`
+  );
+  jukeboxPlaylistSongs[0].forEach(song => {
+    user.jukeboxPlaylist[song.track.id] = song;
+  });
+  return user;
+}
+
 // function to get my profile, write a separate function to get someone else's
 export function getMyProfile(req, res, next) {
   User.findOne({ _id: req.userId }).then((user) => {
@@ -90,6 +103,15 @@ export function getMyProfile(req, res, next) {
             getSpotifyProfileResult.images.length > 0
           ) {
             profile.profileImgUrl = getSpotifyProfileResult.images[0].url;
+            UserLite.findOne({ userId: req.userId }).then((userLite) => {
+              if (!userLite) {
+                throw new Error(
+                  "Couldn't find userlite when adding spotify picture"
+                );
+              }
+              userLite.profileImg = getSpotifyProfileResult.images[0].url;
+              userLite.save();
+            });
           }
         }
 
@@ -142,6 +164,9 @@ export function getMyProfile(req, res, next) {
           : (profile.widgetList[artistSpotlightIndex].data =
               artistSpotlightWidget.data);
 
+        let playlistId = await getJukeboxPlaylistId(user);
+        user = await syncJukeboxPlaylistWithDb(user, playlistId);
+        
         user.save();
         profile.save();
         res.status(200).json({ message: message, data: profile });
@@ -250,6 +275,8 @@ const getJukeboxPlaylistId = async (user) => {
   }
 };
 
+
+
 export function addSong(req, res, next) {
   User.findById(req.userId)
     .then(async (user) => {
@@ -259,6 +286,7 @@ export function addSong(req, res, next) {
         );
       }
       let playlistId = await getJukeboxPlaylistId(user);
+
       let payload = {
         uris: req.body.trackUris,
       };
@@ -274,9 +302,13 @@ export function addSong(req, res, next) {
         .then((response) => response.json())
         .then((jsonData) => {
           console.log("Data received when adding song", jsonData);
-          res
-            .status(200)
-            .json({ message: "Successfully added song", data: jsonData });
+          user.jukeboxPlaylist[req.body.song.id] = req.body.song;
+          User.replaceOne({ _id: user._id }, user).then((result) => {
+            console.log("Result of replaceOne", result);
+            res
+              .status(200)
+              .json({ message: "Successfully added song", data: jsonData });
+          });
         });
     })
     .catch((err) => next(err));
@@ -309,3 +341,13 @@ export function updateWidgetPrivacy(req, res, next) {
       next(err);
     });
 }
+
+ export function getUsersJukeboxPlaylist(req, res, next) {
+  User.findById(req.userId)
+  .then(user => {
+    if (!user) {
+      throw new Error("Couldn't find user when retrieving jukebox playlist")
+    }
+    res.status(200).json({message: "User's jukebox playlist", data: user.jukeboxPlaylist})
+  })
+ }
