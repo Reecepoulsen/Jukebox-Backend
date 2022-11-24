@@ -275,8 +275,6 @@ const getJukeboxPlaylistId = async (user) => {
   }
 };
 
-
-
 export function addSong(req, res, next) {
   User.findById(req.userId)
     .then(async (user) => {
@@ -301,10 +299,11 @@ export function addSong(req, res, next) {
       })
         .then((response) => response.json())
         .then((jsonData) => {
-          console.log("Data received when adding song", jsonData);
-          user.jukeboxPlaylist[req.body.song.id] = req.body.song;
+          const songId = req.body.song.id
+          console.log("user.jukeboxPlaylist[songId] before adding", user.jukeboxPlaylist[songId]);
+          user.jukeboxPlaylist[songId] = req.body.song;
+          console.log("user.jukeboxPlaylist[songId] after adding", user.jukeboxPlaylist[songId]?.name);
           User.replaceOne({ _id: user._id }, user).then((result) => {
-            console.log("Result of replaceOne", result);
             res
               .status(200)
               .json({ message: "Successfully added song", data: jsonData });
@@ -312,6 +311,44 @@ export function addSong(req, res, next) {
         });
     })
     .catch((err) => next(err));
+}
+
+export function removeSong(req, res, next) {
+  User.findById(req.userId)
+  .then(async user => {
+    if (!user) {
+      throw new Error("Couldn't find user when removing song")
+    }
+
+    let playlistId = await getJukeboxPlaylistId(user);
+
+    let payload = {
+      uris: req.body.trackUris,
+    };
+
+    fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${user.spotifyAccessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((response) => response.json())
+      .then((jsonData) => {
+        // console.log("Data received when removing song", jsonData);
+        const songId = req.body.song.id
+        console.log("user.jukeboxPlaylist[songId] before deleting", user.jukeboxPlaylist[songId]?.name)
+        delete user.jukeboxPlaylist[songId];
+        console.log("user.jukeboxPlaylist[songId] after deleting", user.jukeboxPlaylist[songId])
+        User.replaceOne({ _id: user._id }, user).then((result) => {
+          // console.log("Result of replaceOne in removeSong", result);
+          res
+            .status(200)
+            .json({ message: "Successfully removed song", data: jsonData });
+        });
+      });
+  }).catch(err => next(err));
 }
 
 export function updateWidgetPrivacy(req, res, next) {
