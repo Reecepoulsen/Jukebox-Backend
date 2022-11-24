@@ -40,7 +40,7 @@ export function signup(req, res, next) {
       return user.save();
     })
     .then((result) => {
-      console.log("creating userList");
+      console.log("creating userLite");
       const userLite = new UserLite({
         userId: newUser._id,
         name: name,

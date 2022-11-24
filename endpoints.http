@@ -98,5 +98,6 @@ Content-Type: {{contentType}}
 {
   "trackUris": [
     "spotify:track:6WqrGbkeXPT7Lqz8DNywoQ"
-  ]
+  ],
+  "song": ""
 }
