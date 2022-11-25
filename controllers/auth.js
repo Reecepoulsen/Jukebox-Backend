@@ -40,13 +40,11 @@ export function signup(req, res, next) {
       return user.save();
     })
     .then((result) => {
-      console.log("creating userLite");
       const userLite = new UserLite({
         userId: newUser._id,
         name: name,
       });
       userLite.save();
-      console.log("userLite is", userLite);
       return res.status(201).json({
         message: "User Created",
         data: { user: newUser, token: token },
@@ -103,8 +101,6 @@ export async function authorizeSpotify(req, res, next) {
       }
 
       const data = req.body;
-      console.log("Data from code exchange with spotify", data);
-
       user.spotifyAccessToken = data.access_token;
       user.spotifyRefreshToken = data.refresh_token;
       user.spotifyTokenTimer = data.expires_in;

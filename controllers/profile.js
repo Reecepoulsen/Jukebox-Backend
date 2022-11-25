@@ -27,7 +27,6 @@ const gatherData = async (token, accumulator, url) => {
 };
 
 const getCurrentSpotifyProfile = async (spotifyToken) => {
-  console.log("Token presented to get current spotify profile", spotifyToken);
   const spotifyProfile = await getSpotifyData(spotifyToken, "/me");
   return spotifyProfile;
 };
@@ -81,19 +80,16 @@ export function getMyProfile(req, res, next) {
             playlists: [],
             widgetList: [],
           });
-
+          console.log("Building new profile")
           profile = newProfile;
           message = "Built Profile!";
         } else {
+          console.log("Profile already exists")
           profile = existingProfile;
           message = "Profile already exists";
         }
         // Get the current user's spotify profile and add that data into Jukebox user and profile
         const getSpotifyProfileResult = await getCurrentSpotifyProfile(token);
-        console.log(
-          "Result of getCurrentSpotifyProfile",
-          getSpotifyProfileResult
-        );
         if (getSpotifyProfileResult.error) {
           user.spotifyUserId = "None";
         } else {
