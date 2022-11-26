@@ -10,6 +10,7 @@ import {
   addSong,
   getUsersJukeboxPlaylist,
   removeSong,
+  getOtherProfile,
 } from "../controllers/profile.js";
 
 const router = Router();
@@ -27,6 +28,9 @@ router.post("/playlist/addSong", isAuth, refSpotify, addSong);
 router.delete("/playlist/removeSong", isAuth, refSpotify, removeSong);
 
 router.get("/playlist", isAuth, getUsersJukeboxPlaylist);
+
+router.get("/:userId", isAuth, getOtherProfile);
+
 
 // router.get("/build", isAuth, refSpotify, buildProfile);
 

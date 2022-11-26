@@ -56,7 +56,7 @@ async function syncJukeboxPlaylistWithDb(user, playlistId) {
     [],
     `https://api.spotify.com/v1/playlists/${playlistId}/tracks`
   );
-  jukeboxPlaylistSongs[0].forEach(song => {
+  jukeboxPlaylistSongs[0].forEach((song) => {
     user.jukeboxPlaylist[song.track.id] = song;
   });
   return user;
@@ -80,11 +80,11 @@ export function getMyProfile(req, res, next) {
             playlists: [],
             widgetList: [],
           });
-          console.log("Building new profile")
+          console.log("Building new profile");
           profile = newProfile;
           message = "Built Profile!";
         } else {
-          console.log("Profile already exists")
+          console.log("Profile already exists");
           profile = existingProfile;
           message = "Profile already exists";
         }
@@ -162,15 +162,28 @@ export function getMyProfile(req, res, next) {
 
         let playlistId = await getJukeboxPlaylistId(user);
         user = await syncJukeboxPlaylistWithDb(user, playlistId);
-        
+
         user.save();
         profile.save();
         res.status(200).json({ message: message, data: profile });
       })
-      .catch((err) => {
-        next(err);
-      });
+      .catch((err) => next(err));
   });
+}
+
+export function getOtherProfile(req, res, next) {
+  Profile.findOne({ userId: req.params.userId })
+    .then((profile) => {
+      if (!profile) {
+        throw new Error(`Error getting profile for user ${req.params.userId}`);
+      }
+
+      res.status(200).json({
+        message: `Result of getting profile for user ${req.params.userId}`,
+        data: profile,
+      });
+    })
+    .catch((err) => next(err));
 }
 
 export function getUser(req, res, next) {
@@ -186,9 +199,7 @@ export function getUser(req, res, next) {
 
       res.status(200).json({ message: "Found user", user: user });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch((err) => next(err));
 }
 
 export function getAllUserLites(req, res, next) {
@@ -205,9 +216,7 @@ export function getAllUserLites(req, res, next) {
         .status(200)
         .json({ message: "Successfully got all users", data: users });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch((err) => next(err));
 }
 
 export function getSongsInPlaylist(req, res, next) {
@@ -230,10 +239,8 @@ export function getSongsInPlaylist(req, res, next) {
         data: playlistData,
       });
     })
-    .catch((err) => {
-      next(err);
-    });
-  gatherData;
+    .catch((err) => next(err));
+  // gatherData;
 }
 
 const getJukeboxPlaylistId = async (user) => {
@@ -295,10 +302,16 @@ export function addSong(req, res, next) {
       })
         .then((response) => response.json())
         .then((jsonData) => {
-          const songId = req.body.song.id
-          console.log("user.jukeboxPlaylist[songId] before adding", user.jukeboxPlaylist[songId]);
+          const songId = req.body.song.id;
+          console.log(
+            "user.jukeboxPlaylist[songId] before adding",
+            user.jukeboxPlaylist[songId]
+          );
           user.jukeboxPlaylist[songId] = req.body.song;
-          console.log("user.jukeboxPlaylist[songId] after adding", user.jukeboxPlaylist[songId]?.name);
+          console.log(
+            "user.jukeboxPlaylist[songId] after adding",
+            user.jukeboxPlaylist[songId]?.name
+          );
           User.replaceOne({ _id: user._id }, user).then((result) => {
             res
               .status(200)
@@ -311,40 +324,47 @@ export function addSong(req, res, next) {
 
 export function removeSong(req, res, next) {
   User.findById(req.userId)
-  .then(async user => {
-    if (!user) {
-      throw new Error("Couldn't find user when removing song")
-    }
+    .then(async (user) => {
+      if (!user) {
+        throw new Error("Couldn't find user when removing song");
+      }
 
-    let playlistId = await getJukeboxPlaylistId(user);
+      let playlistId = await getJukeboxPlaylistId(user);
 
-    let payload = {
-      uris: req.body.trackUris,
-    };
+      let payload = {
+        uris: req.body.trackUris,
+      };
 
-    fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${user.spotifyAccessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((response) => response.json())
-      .then((jsonData) => {
-        // console.log("Data received when removing song", jsonData);
-        const songId = req.body.song.id
-        console.log("user.jukeboxPlaylist[songId] before deleting", user.jukeboxPlaylist[songId]?.name)
-        delete user.jukeboxPlaylist[songId];
-        console.log("user.jukeboxPlaylist[songId] after deleting", user.jukeboxPlaylist[songId])
-        User.replaceOne({ _id: user._id }, user).then((result) => {
-          // console.log("Result of replaceOne in removeSong", result);
-          res
-            .status(200)
-            .json({ message: "Successfully removed song", data: jsonData });
+      fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${user.spotifyAccessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((response) => response.json())
+        .then((jsonData) => {
+          // console.log("Data received when removing song", jsonData);
+          const songId = req.body.song.id;
+          console.log(
+            "user.jukeboxPlaylist[songId] before deleting",
+            user.jukeboxPlaylist[songId]?.name
+          );
+          delete user.jukeboxPlaylist[songId];
+          console.log(
+            "user.jukeboxPlaylist[songId] after deleting",
+            user.jukeboxPlaylist[songId]
+          );
+          User.replaceOne({ _id: user._id }, user).then((result) => {
+            // console.log("Result of replaceOne in removeSong", result);
+            res
+              .status(200)
+              .json({ message: "Successfully removed song", data: jsonData });
+          });
         });
-      });
-  }).catch(err => next(err));
+    })
+    .catch((err) => next(err));
 }
 
 export function updateWidgetPrivacy(req, res, next) {
@@ -370,17 +390,19 @@ export function updateWidgetPrivacy(req, res, next) {
         });
       });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch((err) => next(err));
 }
 
- export function getUsersJukeboxPlaylist(req, res, next) {
+export function getUsersJukeboxPlaylist(req, res, next) {
   User.findById(req.userId)
-  .then(user => {
-    if (!user) {
-      throw new Error("Couldn't find user when retrieving jukebox playlist")
-    }
-    res.status(200).json({message: "User's jukebox playlist", data: user.jukeboxPlaylist})
-  })
- }
+    .then((user) => {
+      if (!user) {
+        throw new Error("Couldn't find user when retrieving jukebox playlist");
+      }
+      res.status(200).json({
+        message: "User's jukebox playlist",
+        data: user.jukeboxPlaylist,
+      });
+    })
+    .catch((err) => next(err));
+}

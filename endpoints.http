@@ -101,3 +101,7 @@ Content-Type: {{contentType}}
   ],
   "song": ""
 }
+
+###
+GET http://localhost:8080/profile/637eb4b2d404743caebae6cc
+Authorization: Bearer {{token}}
