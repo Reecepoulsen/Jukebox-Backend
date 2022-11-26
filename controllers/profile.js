@@ -116,7 +116,7 @@ export function getMyProfile(req, res, next) {
         const topHitsWidget = {
           type: "songList",
           title: "Top Hits",
-          privacy: "Private",
+          privacy: "Public",
           data: topSongs,
           addedToProfile: true,
         };
@@ -132,7 +132,7 @@ export function getMyProfile(req, res, next) {
         const playlistWidget = {
           type: "playlist",
           title: "Playlists",
-          privacy: "Private",
+          privacy: "Public",
           data: playlists,
           addedToProfile: true,
         };
@@ -148,7 +148,7 @@ export function getMyProfile(req, res, next) {
         const artistSpotlightWidget = {
           type: "artistSpotlight",
           title: "Artist Spotlight",
-          privacy: "Private",
+          privacy: "Public",
           data: topArtists,
           addedToProfile: true,
         };
