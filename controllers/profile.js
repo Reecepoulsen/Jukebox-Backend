@@ -44,6 +44,12 @@ const getUsersTopSongs = async (spotifyToken) => {
   return data.items;
 };
 
+const getUsersLikedSongs = async (spotifyToken) => {
+  const data = await gatherData(spotifyToken, [], "https://api.spotify.com/v1/me/tracks?limit=50");
+  console.log("User's liked songs count", data.flat())
+  return data.flat();
+};
+
 const getUsersTopArtists = async (spotifyToken) => {
   const data = await getSpotifyData(spotifyToken, "/me/top/artists?limit=10");
   return data.items;
@@ -159,6 +165,22 @@ export function getMyProfile(req, res, next) {
           ? profile.widgetList.push(artistSpotlightWidget)
           : (profile.widgetList[artistSpotlightIndex].data =
               artistSpotlightWidget.data);
+
+        // Create the user's liked songs widget
+        const likedSongs = await getUsersLikedSongs(token);
+        const likedSongsWidget = {
+          type: "songList",
+          title: "Liked Songs",
+          privacy: "Public",
+          data: likedSongs,
+          addedToProfile: true,
+        };
+        let likedSongsIndex = profile.widgetList.findIndex(
+          (widget) => widget.title === "Liked Songs"
+        );
+        likedSongsIndex === -1
+          ? profile.widgetList.push(likedSongsWidget)
+          : (profile.widgetList[likedSongsIndex].data = likedSongsWidget.data);
 
         let playlistId = await getJukeboxPlaylistId(user);
         user = await syncJukeboxPlaylistWithDb(user, playlistId);
