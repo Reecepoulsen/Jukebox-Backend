@@ -406,3 +406,22 @@ export function getUsersJukeboxPlaylist(req, res, next) {
     })
     .catch((err) => next(err));
 }
+
+export function getUsersSpotifyToken(req, res, next) {
+  console.log("triggered getUsersSpotifyToken with this user", req.userId);
+  User.findById(req.userId)
+    .then((user) => {
+      if (!user) {
+        throw new Error(
+          "Couldn't find user while getting spotify access token"
+        );
+      }
+      res
+        .status(200)
+        .json({
+          message: "Got user's spotify token",
+          data: user.spotifyAccessToken,
+        });
+    })
+    .catch((err) => next(err));
+}
