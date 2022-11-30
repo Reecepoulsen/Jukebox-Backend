@@ -167,20 +167,20 @@ export function getMyProfile(req, res, next) {
               artistSpotlightWidget.data);
 
         // Create the user's liked songs widget
-        const likedSongs = await getUsersLikedSongs(token);
-        const likedSongsWidget = {
-          type: "songList",
-          title: "Liked Songs",
-          privacy: "Public",
-          data: likedSongs,
-          addedToProfile: true,
-        };
-        let likedSongsIndex = profile.widgetList.findIndex(
-          (widget) => widget.title === "Liked Songs"
-        );
-        likedSongsIndex === -1
-          ? profile.widgetList.push(likedSongsWidget)
-          : (profile.widgetList[likedSongsIndex].data = likedSongsWidget.data);
+        // const likedSongs = await getUsersLikedSongs(token);
+        // const likedSongsWidget = {
+        //   type: "songList",
+        //   title: "Liked Songs",
+        //   privacy: "Public",
+        //   data: likedSongs,
+        //   addedToProfile: true,
+        // };
+        // let likedSongsIndex = profile.widgetList.findIndex(
+        //   (widget) => widget.title === "Liked Songs"
+        // );
+        // likedSongsIndex === -1
+        //   ? profile.widgetList.push(likedSongsWidget)
+        //   : (profile.widgetList[likedSongsIndex].data = likedSongsWidget.data);
 
         let playlistId = await getJukeboxPlaylistId(user);
         user = await syncJukeboxPlaylistWithDb(user, playlistId);
