@@ -31,23 +31,30 @@ const getCurrentSpotifyProfile = async (spotifyToken) => {
   return spotifyProfile;
 };
 
+const getUsersLikedSongs = async (spotifyToken) => {
+  const data = await gatherData(spotifyToken, [], "https://api.spotify.com/v1/me/tracks?limit=50");
+  console.log("User's liked songs count", data.flat())
+  return data.flat();
+};
+
 const getAllPlaylists = async (spotifyToken, spotifyUserId) => {
   const data = await getSpotifyData(
     spotifyToken,
     `/users/${spotifyUserId}/playlists`
   );
+  const likedSongsPlaylist = {
+    id: "Liked Songs",
+    name: "Liked Songs",
+    images: [],
+    tracks: [],
+  }
+  data.items.unshift(likedSongsPlaylist);
   return data.items;
 };
 
 const getUsersTopSongs = async (spotifyToken) => {
   const data = await getSpotifyData(spotifyToken, "/me/top/tracks?limit=25");
   return data.items;
-};
-
-const getUsersLikedSongs = async (spotifyToken) => {
-  const data = await gatherData(spotifyToken, [], "https://api.spotify.com/v1/me/tracks?limit=50");
-  console.log("User's liked songs count", data.flat())
-  return data.flat();
 };
 
 const getUsersTopArtists = async (spotifyToken) => {
@@ -250,11 +257,17 @@ export function getSongsInPlaylist(req, res, next) {
         throw new Error("Unable to find user when getting songs in playlist");
       }
 
-      const playlistData = await gatherData(
-        user.spotifyAccessToken,
-        [],
-        `https://api.spotify.com/v1/playlists/${playlistId}/tracks`
-      );
+      let playlistData = null
+      if (playlistId === "Liked Songs") {
+        playlistData = await getUsersLikedSongs(user.spotifyAccessToken)
+      } else {
+        playlistData = await gatherData(
+          user.spotifyAccessToken,
+          [],
+          `https://api.spotify.com/v1/playlists/${playlistId}/tracks`
+        );
+      }
+
       console.log("playlist data", playlistData);
       res.status(200).json({
         message: "Successfully got songs for playlist",
