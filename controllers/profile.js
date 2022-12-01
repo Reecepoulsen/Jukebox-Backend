@@ -3,6 +3,7 @@ import User from "../models/user.js";
 import Profile from "../models/profile.js";
 import UserLite from "../models/userLite.js";
 import { getSpotifyData } from "../helpers/spotifyComHelpers.js";
+import { refreshSpotifyToken } from "../middleware/refSpotify.js";
 
 const gatherData = async (token, accumulator, url) => {
   console.log("Getting", url);
@@ -32,22 +33,26 @@ const getCurrentSpotifyProfile = async (spotifyToken) => {
 };
 
 const getUsersLikedSongs = async (spotifyToken) => {
-  const data = await gatherData(spotifyToken, [], "https://api.spotify.com/v1/me/tracks?limit=50");
-  console.log("User's liked songs count", data.flat())
+  const data = await gatherData(
+    spotifyToken,
+    [],
+    "https://api.spotify.com/v1/me/tracks?limit=50"
+  );
   return data.flat();
 };
 
-const getAllPlaylists = async (spotifyToken, spotifyUserId) => {
+const getAllPlaylists = async (spotifyToken, user) => {
   const data = await getSpotifyData(
     spotifyToken,
-    `/users/${spotifyUserId}/playlists`
+    `/users/${user.spotifyUserId}/playlists`
   );
+
   const likedSongsPlaylist = {
-    id: "Liked Songs",
+    id: `Liked Songs ${user._id}`,
     name: "Liked Songs",
     images: [],
     tracks: [],
-  }
+  };
   data.items.unshift(likedSongsPlaylist);
   return data.items;
 };
@@ -141,7 +146,7 @@ export function getMyProfile(req, res, next) {
           : (profile.widgetList[topHitsIndex].data = topHitsWidget.data);
 
         // Create the playlist widget
-        const playlists = await getAllPlaylists(token, user.spotifyUserId);
+        const playlists = await getAllPlaylists(token, user);
         const playlistWidget = {
           type: "playlist",
           title: "Playlists",
@@ -172,22 +177,6 @@ export function getMyProfile(req, res, next) {
           ? profile.widgetList.push(artistSpotlightWidget)
           : (profile.widgetList[artistSpotlightIndex].data =
               artistSpotlightWidget.data);
-
-        // Create the user's liked songs widget
-        // const likedSongs = await getUsersLikedSongs(token);
-        // const likedSongsWidget = {
-        //   type: "songList",
-        //   title: "Liked Songs",
-        //   privacy: "Public",
-        //   data: likedSongs,
-        //   addedToProfile: true,
-        // };
-        // let likedSongsIndex = profile.widgetList.findIndex(
-        //   (widget) => widget.title === "Liked Songs"
-        // );
-        // likedSongsIndex === -1
-        //   ? profile.widgetList.push(likedSongsWidget)
-        //   : (profile.widgetList[likedSongsIndex].data = likedSongsWidget.data);
 
         let playlistId = await getJukeboxPlaylistId(user);
         user = await syncJukeboxPlaylistWithDb(user, playlistId);
@@ -257,9 +246,14 @@ export function getSongsInPlaylist(req, res, next) {
         throw new Error("Unable to find user when getting songs in playlist");
       }
 
-      let playlistData = null
-      if (playlistId === "Liked Songs") {
-        playlistData = await getUsersLikedSongs(user.spotifyAccessToken)
+      let playlistData = null;
+      if (playlistId.includes("Liked Songs")) {
+        let ownerUserId = playlistId.slice(12, playlistId.length);
+        await User.findById(ownerUserId).then(async (owner) => {
+          console.log("\nCheck if liked songs owner's spotify token needs a refresh ");
+          await refreshSpotifyToken(owner);
+          playlistData = await getUsersLikedSongs(owner.spotifyAccessToken);
+        });
       } else {
         playlistData = await gatherData(
           user.spotifyAccessToken,
@@ -268,7 +262,7 @@ export function getSongsInPlaylist(req, res, next) {
         );
       }
 
-      console.log("playlist data", playlistData);
+      // console.log("playlist data", playlistData);
       res.status(200).json({
         message: "Successfully got songs for playlist",
         data: playlistData,
@@ -451,12 +445,10 @@ export function getUsersSpotifyToken(req, res, next) {
           "Couldn't find user while getting spotify access token"
         );
       }
-      res
-        .status(200)
-        .json({
-          message: "Got user's spotify token",
-          data: user.spotifyAccessToken,
-        });
+      res.status(200).json({
+        message: "Got user's spotify token",
+        data: user.spotifyAccessToken,
+      });
     })
     .catch((err) => next(err));
 }
