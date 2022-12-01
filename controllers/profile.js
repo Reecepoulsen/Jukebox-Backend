@@ -44,7 +44,7 @@ const getUsersLikedSongs = async (spotifyToken) => {
 const getAllPlaylists = async (spotifyToken, user) => {
   const data = await getSpotifyData(
     spotifyToken,
-    `/users/${user.spotifyUserId}/playlists`
+    `/users/${user.spotifyUserId}/playlists?limit=50`
   );
 
   const likedSongsPlaylist = {
