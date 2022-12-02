@@ -250,7 +250,9 @@ export function getSongsInPlaylist(req, res, next) {
       if (playlistId.includes("Liked Songs")) {
         let ownerUserId = playlistId.slice(12, playlistId.length);
         await User.findById(ownerUserId).then(async (owner) => {
-          console.log("\nCheck if liked songs owner's spotify token needs a refresh ");
+          console.log(
+            "\nCheck if liked songs owner's spotify token needs a refresh "
+          );
           await refreshSpotifyToken(owner);
           playlistData = await getUsersLikedSongs(owner.spotifyAccessToken);
         });
@@ -270,6 +272,30 @@ export function getSongsInPlaylist(req, res, next) {
     })
     .catch((err) => next(err));
   // gatherData;
+}
+
+export function getTopSongsForArtist(req, res, next) {
+  const artistId = req.params.artistId;
+  console.log("getTopSongsForArtist", artistId);
+  User.findById(req.userId)
+    .then(async (user) => {
+      if (!user) {
+        throw new Error("Couldn't find user when get top songs for artist");
+      }
+
+      const response = await getSpotifyData(
+        user.spotifyAccessToken,
+        `/artists/${artistId}/top-tracks?market=US`
+      );
+
+      console.log("Response of getSpotifyData for artists songs", response)
+
+      const artistSongs = response.tracks;
+      res
+        .status(200)
+        .json({ message: "Got artists top songs", data: artistSongs });
+    })
+    .catch((err) => next(err));
 }
 
 const getJukeboxPlaylistId = async (user) => {
