@@ -11,7 +11,8 @@ import {
   getUsersJukeboxPlaylist,
   removeSong,
   getOtherProfile,
-  getUsersSpotifyToken
+  getUsersSpotifyToken,
+  getTopSongsForArtist
 } from "../controllers/profile.js";
 
 const router = Router();
@@ -33,6 +34,8 @@ router.get("/playlist", isAuth, getUsersJukeboxPlaylist);
 router.get("/:userId", isAuth, getOtherProfile);
 
 router.get("/token/spotify", isAuth, refSpotify, getUsersSpotifyToken);
+
+router.get("/artist/:artistId", isAuth, refSpotify, getTopSongsForArtist)
 
 // router.get("/build", isAuth, refSpotify, buildProfile);
 
