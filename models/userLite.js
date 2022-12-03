@@ -15,10 +15,10 @@ const UserLiteSchema = new Schema({
     required: true,
     default: "None"
   },
-  followerCount: {
-    type: Number,
+  followers: {
+    type: Object,
     required: true,
-    default: 0
+    default: {}
   }
 });
 

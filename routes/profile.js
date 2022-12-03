@@ -12,7 +12,9 @@ import {
   removeSong,
   getOtherProfile,
   getUsersSpotifyToken,
-  getTopSongsForArtist
+  getTopSongsForArtist,
+  getFollowersForUser,
+  modifyFollower,
 } from "../controllers/profile.js";
 
 const router = Router();
@@ -35,7 +37,11 @@ router.get("/:userId", isAuth, getOtherProfile);
 
 router.get("/token/spotify", isAuth, refSpotify, getUsersSpotifyToken);
 
-router.get("/artist/:artistId", isAuth, refSpotify, getTopSongsForArtist)
+router.get("/artist/:artistId", isAuth, refSpotify, getTopSongsForArtist);
+
+router.get("/followers/get", isAuth, getFollowersForUser);
+
+router.post("/followers/modify", isAuth, modifyFollower);
 
 // router.get("/build", isAuth, refSpotify, buildProfile);
 

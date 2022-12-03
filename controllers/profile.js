@@ -4,6 +4,7 @@ import Profile from "../models/profile.js";
 import UserLite from "../models/userLite.js";
 import { getSpotifyData } from "../helpers/spotifyComHelpers.js";
 import { refreshSpotifyToken } from "../middleware/refSpotify.js";
+import userLite from "../models/userLite.js";
 
 const gatherData = async (token, accumulator, url) => {
   console.log("Getting", url);
@@ -288,7 +289,7 @@ export function getTopSongsForArtist(req, res, next) {
         `/artists/${artistId}/top-tracks?market=US`
       );
 
-      console.log("Response of getSpotifyData for artists songs", response)
+      console.log("Response of getSpotifyData for artists songs", response);
 
       const artistSongs = response.tracks;
       res
@@ -477,4 +478,78 @@ export function getUsersSpotifyToken(req, res, next) {
       });
     })
     .catch((err) => next(err));
+}
+
+export function getFollowersForUser(req, res, next) {
+  console.log("Getting followers for", req.userId);
+  UserLite.findOne({ userId: req.userId })
+    .then(async (userlite) => {
+      if (!userlite) {
+        throw new Error("Couldn't find userlite when getting their followers");
+      }
+
+      const followerList = [];
+      for (let userliteId in userlite.followers) {
+        console.log("----->", userlite.followers[userliteId]);
+        await UserLite.findById(userlite.followers[userliteId]).then(
+          (followersUserLite) => {
+            if (!followersUserLite) {
+              throw new Error(
+                "Couldn't find follower's UserLite while looking up follower"
+              );
+            }
+            console.log("found userlite", followersUserLite);
+            followerList.push(followersUserLite);
+          }
+        );
+      }
+      console.log("Followerlist", followerList);
+      res
+        .status(200)
+        .json({
+          message: "Got user's followers",
+          followerList: followerList,
+          followerDataStructure: userlite.followers,
+        });
+    })
+    .catch((err) => next(err));
+}
+
+export async function modifyFollower(req, res, next) {
+  try {
+    let newUserlite = null;
+    const followerCount = await UserLite.findOne({ userId: req.userId }).then(
+      (userlite) => {
+        if (!userlite) {
+          throw new Error("Couldn't find userlite to add follower count to");
+        }
+        newUserlite = userlite;
+        if (req.body.operation === "add") {
+          newUserlite.followers[req.body.followerUserId] =
+            req.body.followerUserliteId;
+        } else if (req.body.operation === "remove") {
+          delete newUserlite.followers[req.body.followerUserId];
+        }
+        return Object.keys(newUserlite.followers).length;
+      }
+    );
+
+    // Don't need this for this phase but can use to modify follower count
+    // let newProfile = null;
+    // await Profile.findOne({ userId: req.userId }).then((profile) => {
+    //   if (!profile) {
+    //     throw new Error("Couldn't find profile to add follower count to");
+    //   }
+    //   newProfile = profile;
+    //   newProfile.followerCount = followerCount;
+    // });
+
+    // await Profile.replaceOne({userId: req.userId}, newProfile);
+    await UserLite.replaceOne({ userId: req.userId }, newUserlite);
+    res
+      .status(200)
+      .json({ message: "Modified follower status", data: followerCount });
+  } catch (err) {
+    next(err);
+  }
 }

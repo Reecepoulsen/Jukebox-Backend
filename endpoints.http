@@ -109,3 +109,25 @@ Authorization: Bearer {{token}}
 ###
 GET http://localhost:8080/profile/token/spotify
 Authorization: Bearer {{token}}
+
+###
+POST http://localhost:8080/profile/followers/modify
+Authorization: Basic {{token}}
+Content-Type: {{contentType}}
+
+{
+  "operation": "add",
+  "followerUserId": "63824a9ec3cee76fe85576fd",
+  "followerUserliteId": "63824a9ec3cee76fe85576ff"
+}
+
+###
+POST http://localhost:8080/profile/followers/modify
+Authorization: Basic {{token}}
+Content-Type: {{contentType}}
+
+{
+  "operation": "remove",
+  "followerUserId": "63824a9ec3cee76fe85576fd",
+  "followerUserliteId": "63824a9ec3cee76fe85576ff"
+}
