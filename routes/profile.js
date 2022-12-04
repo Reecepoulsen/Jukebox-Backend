@@ -14,7 +14,8 @@ import {
   getUsersSpotifyToken,
   getTopSongsForArtist,
   getFollowersForUser,
-  modifyFollower,
+  getFollowingForUser,
+  modifyFollowStatus,
 } from "../controllers/profile.js";
 
 const router = Router();
@@ -41,7 +42,9 @@ router.get("/artist/:artistId", isAuth, refSpotify, getTopSongsForArtist);
 
 router.get("/followers/get", isAuth, getFollowersForUser);
 
-router.post("/followers/modify", isAuth, modifyFollower);
+router.get("/following/get", isAuth, getFollowingForUser);
+
+router.post("/follow/status", isAuth, modifyFollowStatus);
 
 // router.get("/build", isAuth, refSpotify, buildProfile);
 

@@ -15,6 +15,11 @@ const UserLiteSchema = new Schema({
     required: true,
     default: "None"
   },
+  following: {
+    type: Object,
+    required: true,
+    default: {}
+  },
   followers: {
     type: Object,
     required: true,

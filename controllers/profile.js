@@ -504,39 +504,85 @@ export function getFollowersForUser(req, res, next) {
         );
       }
       console.log("Followerlist", followerList);
-      res
-        .status(200)
-        .json({
-          message: "Got user's followers",
-          followerList: followerList,
-          followerDataStructure: userlite.followers,
-        });
+      res.status(200).json({
+        message: "Got user's followers",
+        userList: followerList,
+        userDataStructure: userlite.followers,
+      });
     })
     .catch((err) => next(err));
 }
 
-export async function modifyFollower(req, res, next) {
+export function getFollowingForUser(req, res, next) {
+  console.log("Getting following for", req.userId);
+  UserLite.findOne({ userId: req.userId })
+    .then(async (userlite) => {
+      if (!userlite) {
+        throw new Error("Couldn't find userlite when getting their following");
+      }
+
+      const followingList = [];
+      for (let userliteId in userlite.following) {
+        console.log("----->", userlite.following[userliteId]);
+        await UserLite.findById(userlite.following[userliteId]).then(
+          (followingUserLite) => {
+            if (!followingUserLite) {
+              throw new Error(
+                "Couldn't find follower's UserLite while looking up following"
+              );
+            }
+            console.log("found userlite", followingUserLite);
+            followingList.push(followingUserLite);
+          }
+        );
+      }
+      console.log("followingList", followingList);
+      res.status(200).json({
+        message: "Got user's following",
+        userList: followingList,
+        userDataStructure: userlite.following,
+      });
+    })
+    .catch((err) => next(err));
+}
+
+export async function modifyFollowStatus(req, res, next) {
   try {
     let newUserlite = null;
     const followerCount = await UserLite.findOne({ userId: req.userId }).then(
-      (userlite) => {
+      async (userlite) => {
         if (!userlite) {
           throw new Error("Couldn't find userlite to add follower count to");
         }
-        newUserlite = userlite;
-        if (req.body.operation === "add") {
-          newUserlite.followers[req.body.followerUserId] =
-            req.body.followerUserliteId;
-        } else if (req.body.operation === "remove") {
-          delete newUserlite.followers[req.body.followerUserId];
-        }
+
+        await UserLite.findById(req.body.followUserliteId).then(
+          async (userliteToModifyFollowersFor) => {
+            if (!userliteToModifyFollowersFor) {
+              throw new Error("Couldn't find userlite to add follower to");
+            }
+
+            newUserlite = userlite;
+            if (req.body.operation === "add") {
+              newUserlite.following[req.body.followUserId] =
+                req.body.followUserliteId;
+              userliteToModifyFollowersFor.followers[req.userId] = userlite._id;
+            } else if (req.body.operation === "remove") {
+              delete newUserlite.following[req.body.followUserId];
+              delete userliteToModifyFollowersFor.followers[req.userId];
+            }
+
+            await UserLite.replaceOne(
+              { userId: userliteToModifyFollowersFor.userId },
+              userliteToModifyFollowersFor
+            );
+          }
+        );
         return Object.keys(newUserlite.followers).length;
       }
     );
 
-    // Don't need this for this phase but can use to modify follower count
     // let newProfile = null;
-    // await Profile.findOne({ userId: req.userId }).then((profile) => {
+    // await Profile.findOne({ userId: req.body.followUserId }).then((profile) => {
     //   if (!profile) {
     //     throw new Error("Couldn't find profile to add follower count to");
     //   }
@@ -544,8 +590,8 @@ export async function modifyFollower(req, res, next) {
     //   newProfile.followerCount = followerCount;
     // });
 
-    // await Profile.replaceOne({userId: req.userId}, newProfile);
     await UserLite.replaceOne({ userId: req.userId }, newUserlite);
+    // await Profile.replaceOne({userId: req.userId}, newProfile);
     res
       .status(200)
       .json({ message: "Modified follower status", data: followerCount });
