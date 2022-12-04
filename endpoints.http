@@ -131,3 +131,12 @@ Content-Type: {{contentType}}
   "followerUserId": "63824a9ec3cee76fe85576fd",
   "followerUserliteId": "63824a9ec3cee76fe85576ff"
 }
+
+###
+DELETE http://localhost:8080/auth/user
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "userIdToDelete": "638c0309fec53ecb1e11d504"
+}

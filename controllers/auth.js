@@ -4,6 +4,7 @@ const { sign } = jwt;
 import User from "../models/user.js";
 import UserLite from "../models/userLite.js";
 import CryptoJS from "crypto-js";
+import profile from "../models/profile.js";
 
 export function signup(req, res, next) {
   const name = req.body.name;
@@ -108,12 +109,10 @@ export async function authorizeSpotify(req, res, next) {
 
       console.log("Updated Spotify token for", user.name);
 
-      res
-        .status(200)
-        .json({
-          status: 200,
-          message: "Successfully connected Spotify account",
-        });
+      res.status(200).json({
+        status: 200,
+        message: "Successfully connected Spotify account",
+      });
     })
     .catch((err) => {
       err.statusCode = 401;
@@ -129,15 +128,34 @@ export async function getSpotifyToken(req, res, next) {
         throw err;
       }
 
-      res
-        .status(200)
-        .json({
-          message: `Got ${user.name}'s spotifyAccessToken`,
-          data: user.spotifyAccessToken,
-        });
-      })
-      .catch((err) => {
+      res.status(200).json({
+        message: `Got ${user.name}'s spotifyAccessToken`,
+        data: user.spotifyAccessToken,
+      });
+    })
+    .catch((err) => {
       err.statusCode(404);
       next(err);
     });
+}
+
+export async function deleteUser(req, res, next) {
+  const userIdToDelete = req.body.userIdToDelete;
+
+  const userDeleteResult = await User.deleteMany({ _id: userIdToDelete });
+  const userliteDeleteResult = await UserLite.deleteMany({
+    userId: userIdToDelete,
+  });
+  const profileDeleteResult = await profile.deleteMany({
+    userId: userIdToDelete,
+  });
+
+  res.status(200).json({
+    message: `Deleted user ${userIdToDelete}`,
+    data: {
+      userDeleteResult: userDeleteResult,
+      userliteDeleteResult: userliteDeleteResult,
+      profileDeleteResult: profileDeleteResult,
+    },
+  });
 }
