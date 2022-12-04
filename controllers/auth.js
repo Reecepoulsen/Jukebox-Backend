@@ -90,7 +90,6 @@ export function login(req, res, next) {
 }
 
 export async function authorizeSpotify(req, res, next) {
-  console.log("authorizespotify");
   User.findById(req.userId)
     .then(async (user) => {
       if (!user) {

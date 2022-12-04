@@ -38,7 +38,6 @@ export async function refreshSpotifyToken(user){
     })
       .then((response) => response.json())
       .then(async (data) => {
-        console.log("data received from refreshing spotify token", data);
         if (!data.access_token) {
           const err = new Error(
             "Error refreshing token, no new token provided"
@@ -48,7 +47,6 @@ export async function refreshSpotifyToken(user){
         user.spotifyAccessToken = data.access_token;
         user.lastRefresh = new Date();
         await user.save();
-        console.log("End of spotify refresh");
       });
   } else {
     console.log("------------------------------------------");
