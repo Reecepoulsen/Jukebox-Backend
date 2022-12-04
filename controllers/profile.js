@@ -81,7 +81,7 @@ async function syncJukeboxPlaylistWithDb(user, playlistId) {
 
 // function to get my profile, write a separate function to get someone else's
 export function getMyProfile(req, res, next) {
-  User.findOne({ _id: req.userId }).then((user) => {
+  User.findById(req.userId).then((user) => {
     console.log("Get profile for", user.name);
     const token = user.spotifyAccessToken;
 
@@ -111,10 +111,7 @@ export function getMyProfile(req, res, next) {
           user.spotifyUserId = "None";
         } else {
           user.spotifyUserId = getSpotifyProfileResult.id;
-          if (
-            getSpotifyProfileResult.images != null &&
-            getSpotifyProfileResult.images.length > 0
-          ) {
+          if (getSpotifyProfileResult.images[0]?.url) {
             profile.profileImgUrl = getSpotifyProfileResult.images[0].url;
             UserLite.findOne({ userId: req.userId }).then((userLite) => {
               if (!userLite) {
@@ -181,8 +178,8 @@ export function getMyProfile(req, res, next) {
         let playlistId = await getJukeboxPlaylistId(user);
         user = await syncJukeboxPlaylistWithDb(user, playlistId);
 
-        user.save();
-        profile.save();
+        await user.save();
+        await profile.save();
         res.status(200).json({ message: message, data: profile });
       })
       .catch((err) => next(err));

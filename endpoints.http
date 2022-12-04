@@ -138,5 +138,5 @@ Authorization: Bearer {{token}}
 Content-Type: {{contentType}}
 
 {
-  "userIdToDelete": "638c0309fec53ecb1e11d504"
+  "userIdToDelete": "638c0dc9b085e32b033895d6"
 }
