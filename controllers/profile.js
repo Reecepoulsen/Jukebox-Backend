@@ -4,10 +4,8 @@ import Profile from "../models/profile.js";
 import UserLite from "../models/userLite.js";
 import { getSpotifyData } from "../helpers/spotifyComHelpers.js";
 import { refreshSpotifyToken } from "../middleware/refSpotify.js";
-import userLite from "../models/userLite.js";
 
 const gatherData = async (token, accumulator, url) => {
-  console.log("Getting", url);
   await fetch(url, {
     method: "GET",
     headers: {
@@ -120,9 +118,10 @@ export function getMyProfile(req, res, next) {
             profile.profileImgUrl = getSpotifyProfileResult.images[0].url;
             UserLite.findOne({ userId: req.userId }).then((userLite) => {
               if (!userLite) {
-                throw new Error(
-                  "Couldn't find userlite when adding spotify picture"
-                );
+                userLite = new UserLite({
+                  userId: req.userId,
+                  name: user.name,
+                });
               }
               userLite.profileImg = getSpotifyProfileResult.images[0].url;
               userLite.save();
@@ -230,7 +229,6 @@ export function getAllUserLites(req, res, next) {
         throw err;
       }
 
-      console.log("All users", users);
       res
         .status(200)
         .json({ message: "Successfully got all users", data: users });
@@ -265,7 +263,6 @@ export function getSongsInPlaylist(req, res, next) {
         );
       }
 
-      // console.log("playlist data", playlistData);
       res.status(200).json({
         message: "Successfully got songs for playlist",
         data: playlistData,
@@ -277,7 +274,6 @@ export function getSongsInPlaylist(req, res, next) {
 
 export function getTopSongsForArtist(req, res, next) {
   const artistId = req.params.artistId;
-  console.log("getTopSongsForArtist", artistId);
   User.findById(req.userId)
     .then(async (user) => {
       if (!user) {
@@ -288,8 +284,6 @@ export function getTopSongsForArtist(req, res, next) {
         user.spotifyAccessToken,
         `/artists/${artistId}/top-tracks?market=US`
       );
-
-      console.log("Response of getSpotifyData for artists songs", response);
 
       const artistSongs = response.tracks;
       res
@@ -359,15 +353,7 @@ export function addSong(req, res, next) {
         .then((response) => response.json())
         .then((jsonData) => {
           const songId = req.body.song.id;
-          console.log(
-            "user.jukeboxPlaylist[songId] before adding",
-            user.jukeboxPlaylist[songId]
-          );
           user.jukeboxPlaylist[songId] = req.body.song;
-          console.log(
-            "user.jukeboxPlaylist[songId] after adding",
-            user.jukeboxPlaylist[songId]?.name
-          );
           User.replaceOne({ _id: user._id }, user).then((result) => {
             res
               .status(200)
@@ -401,19 +387,10 @@ export function removeSong(req, res, next) {
       })
         .then((response) => response.json())
         .then((jsonData) => {
-          // console.log("Data received when removing song", jsonData);
           const songId = req.body.song.id;
-          console.log(
-            "user.jukeboxPlaylist[songId] before deleting",
-            user.jukeboxPlaylist[songId]?.name
-          );
           delete user.jukeboxPlaylist[songId];
-          console.log(
-            "user.jukeboxPlaylist[songId] after deleting",
-            user.jukeboxPlaylist[songId]
-          );
+
           User.replaceOne({ _id: user._id }, user).then((result) => {
-            // console.log("Result of replaceOne in removeSong", result);
             res
               .status(200)
               .json({ message: "Successfully removed song", data: jsonData });
@@ -424,7 +401,6 @@ export function removeSong(req, res, next) {
 }
 
 export function updateWidgetPrivacy(req, res, next) {
-  // console.log("Request to change privacy of widget");
   Profile.findOne({ userId: req.userId })
     .then(async (profile) => {
       if (!profile) {
@@ -464,7 +440,6 @@ export function getUsersJukeboxPlaylist(req, res, next) {
 }
 
 export function getUsersSpotifyToken(req, res, next) {
-  console.log("triggered getUsersSpotifyToken with this user", req.userId);
   User.findById(req.userId)
     .then((user) => {
       if (!user) {
@@ -481,7 +456,6 @@ export function getUsersSpotifyToken(req, res, next) {
 }
 
 export function getFollowersForUser(req, res, next) {
-  console.log("Getting followers for", req.userId);
   UserLite.findOne({ userId: req.userId })
     .then(async (userlite) => {
       if (!userlite) {
@@ -490,20 +464,28 @@ export function getFollowersForUser(req, res, next) {
 
       const followerList = [];
       for (let userliteId in userlite.followers) {
-        console.log("----->", userlite.followers[userliteId]);
         await UserLite.findById(userlite.followers[userliteId]).then(
-          (followersUserLite) => {
-            if (!followersUserLite) {
-              throw new Error(
-                "Couldn't find follower's UserLite while looking up follower"
+          async (followersUserLite) => {
+            if (followersUserLite) {
+              followerList.push(followersUserLite);
+            } else {
+              console.log(
+                "-----------> Found a user that no longer exists while getting followers",
+                userlite.followers[userliteId]
+              );
+              delete userlite.followers[userliteId];
+              await UserLite.replaceOne({ _id: userlite._id }, userlite).then(
+                (result) => {
+                  console.log(
+                    "Result of userlite replaceOne while deleting phantom account",
+                    result
+                  );
+                }
               );
             }
-            console.log("found userlite", followersUserLite);
-            followerList.push(followersUserLite);
           }
         );
       }
-      console.log("Followerlist", followerList);
       res.status(200).json({
         message: "Got user's followers",
         userList: followerList,
@@ -514,7 +496,6 @@ export function getFollowersForUser(req, res, next) {
 }
 
 export function getFollowingForUser(req, res, next) {
-  console.log("Getting following for", req.userId);
   UserLite.findOne({ userId: req.userId })
     .then(async (userlite) => {
       if (!userlite) {
@@ -523,20 +504,28 @@ export function getFollowingForUser(req, res, next) {
 
       const followingList = [];
       for (let userliteId in userlite.following) {
-        console.log("----->", userlite.following[userliteId]);
         await UserLite.findById(userlite.following[userliteId]).then(
-          (followingUserLite) => {
-            if (!followingUserLite) {
-              throw new Error(
-                "Couldn't find follower's UserLite while looking up following"
+          async (followingUserLite) => {
+            if (followingUserLite) {
+              followingList.push(followingUserLite);
+            } else {
+              console.log(
+                "-----------> Found a user that no longer exists while getting following",
+                userlite.following[userliteId]
+              );
+              delete userlite.following[userliteId];
+              await UserLite.replaceOne({ _id: userlite._id }, userlite).then(
+                (result) => {
+                  console.log(
+                    "Result of userlite replaceOne while deleting phantom account",
+                    result
+                  );
+                }
               );
             }
-            console.log("found userlite", followingUserLite);
-            followingList.push(followingUserLite);
           }
         );
       }
-      console.log("followingList", followingList);
       res.status(200).json({
         message: "Got user's following",
         userList: followingList,
