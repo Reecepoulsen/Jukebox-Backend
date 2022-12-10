@@ -7,8 +7,9 @@ npm-debug.log
 *.dev
 .DS_Store
 .vscode
-*.http
 
 # Docker
 Dockerfile
 docker-compose.yml
+
+*.http
