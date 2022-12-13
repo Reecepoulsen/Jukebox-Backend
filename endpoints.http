@@ -8,9 +8,9 @@
 #  5. /profile/build adds data into the profile
 
 @contentType = application/json 
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRyZWVjZXBvdWxzZW5AZ21haWwuY29tIiwidXNlcklkIjoiNjM4MDMyOGY5YzM1MDhhY2VkZmFiZjMyIiwiaWF0IjoxNjY5MzQ1OTM1fQ.ns-5smNkxNcRujkc9YWb_2pc6F5bBf9jewetaqb6xC8
+@token = 
 
-@spotifyToken = BQBlknMKWqPCnft7fGmUsQg4zeBWmiXYqPKrtKfHSmV10A5XKc_pwm8UlrETwhedtb7rcym1R43Bdbr8kAkIPhsb3fJ8L6fmMcFtEz0X07FYj5sswnDyB_2XChhGQHDJO2p2zYUC9okFPUdDdC40UTSAnmsVynK3XYK8WeM0ZzDvlDbgEve_Jhqjv6zzk2SCIpaLXjRZfGXBH3DsymElJz-O3O84-6i1YpLORdD4KcZK-Tk
+@spotifyToken = 
 
 ###
 # Base URL
@@ -138,7 +138,5 @@ Authorization: Bearer {{token}}
 Content-Type: {{contentType}}
 
 {
-  "userIdToDelete": "638c0dc9b085e32b033895d6"
+  "userIdToDelete": "6394cadd8e1d9a82ebd7ac5b"
 }
-
-#Test
